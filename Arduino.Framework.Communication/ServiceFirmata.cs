@@ -122,6 +122,10 @@ namespace Arduino.Framework.Communication
 
         public BioloidRegister GetAXS1Register(AXS1RegisterAdd register) { return this.registersActuatorDynamixel.GetAXS1Register(register); }
 
+        public BioloidRegister[] GetAllAX12Register() { return this.registersActuatorDynamixel.GetAX12Registers(); }
+
+        public BioloidRegister[] GetAllAXS1Register() { return this.registersActuatorDynamixel.GetAXS1Registers(); }
+
         #region Methods SendXInstructionMessage
     
         /// <summary>

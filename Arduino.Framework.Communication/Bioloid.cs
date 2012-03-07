@@ -358,6 +358,15 @@ namespace Arduino.Framework.Communication
             }
         }
 
+        public BioloidRegister[] GetAX12Registers() 
+        {
+            return comRegisters.Values.Concat<BioloidRegister>(ax12Registers.Values).ToArray<BioloidRegister>();
+        }
+
+        public BioloidRegister[] GetAXS1Registers()
+        {
+            return comRegisters.Values.Concat<BioloidRegister>(axS1Registers.Values).ToArray<BioloidRegister>();
+        }
 
     }
 

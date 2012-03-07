@@ -116,7 +116,7 @@ namespace Arduino.Framework.Communication
                 });
         }
 
-        protected internal void GetXVal(BioloidRegister register)
+        public void GetXVal(BioloidRegister register)
         {
             lock (this.lockref)
             {
@@ -133,7 +133,7 @@ namespace Arduino.Framework.Communication
         /// </summary>
         /// <param name="add">Addresse du registre à modifier</param>
         /// <param name="val">Nouvelle valeur</param>
-        protected internal void SetXVal(BioloidRegister register, byte val)
+        public void SetXVal(BioloidRegister register, byte val)
         {
             lock (lockref)
             {

@@ -179,6 +179,7 @@
 #define SYSEXCMD_DYNAMIXEL_VOID_GENERIC       0x20 // Utiliser lorsqu'aucune réponse n'est attendue
 #define SYSEXCMD_DYNAMIXEL_INSTRUCTION_PACKET 0x24 // Utiliser de manière générique concerne un Instruction packet (ARDUINO -> BIOLOID)
 #define SYSEXCMD_DYNAMIXEL_STATUS_PACKET      0x23 // Utiliser de manière générique concerne un Status packet      (BIOLOID -> ARDUINO)
+#define SYSEXCMD_ANALOG_READ                  0x25 // utiliser pour une demande de lecture d'une valeur analogue.
 
 
 

@@ -625,6 +625,10 @@ namespace Arduino.Framework.Communication
 
         #endregion
 
+        public void GetTo()
+        {
+            GetXVal(_busarduino.GetAXS1Register(AXS1RegisterAdd.HighestLimitVoltage));
+        }
     }
 
 }

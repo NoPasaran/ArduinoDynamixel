@@ -62,7 +62,7 @@ namespace Arduino.Communication.DataAccess
         /// </summary>
         /// <param name="pin"></param>
         /// <param name="value"></param>
-        public delegate void currentAnalogCallback(byte pin, int value);
+        public delegate void currentAnalogCallback(byte pin, UInt16 value);
         /// <summary>
         /// </summary>
         /// <param name="pin"></param>
@@ -165,6 +165,8 @@ namespace Arduino.Communication.DataAccess
         /// de 1/n actuator.
         /// </summary>
         public const byte SYSEXCMD_DYNAMIXEL_INSTRUCTION_PACKET = 0x24;
+
+        public const byte SYSEXCMD_ANALOG_READ = 0x25;
 
         #endregion 
 
@@ -623,6 +625,7 @@ namespace Arduino.Communication.DataAccess
         {
             switch (storedInputData[0]) // first byte in buffer is command
             {
+                case SYSEXCMD_ANALOG_READ:
                 case SYSEXCMD_DYNAMIXEL_STATUS_PACKET: // correspond à un status packet
                     if (this.SysexCallback != null)
                     {
@@ -697,7 +700,7 @@ namespace Arduino.Communication.DataAccess
                                         break;
                                     case ID_MESS_ANALOG:
                                         if(this.AnalogCallback != null )
-                                            AnalogCallback(multiByteChannel,(storedInputData[0] << 7) + storedInputData[1]);
+                                            AnalogCallback(multiByteChannel,(UInt16)((storedInputData[0] << 7) + storedInputData[1]));
                                         setAnalogInput(multiByteChannel, (storedInputData[0] << 7) + storedInputData[1]);
                                         break;
                                     case SET_PIN_MODE :

@@ -9,21 +9,21 @@ namespace Arduino.Framework.Communication
     public class ServiceFirmata
     {
         #region DataMembers
-        
+
         private AXXRegisterInfo registersActuatorDynamixel;
 
         private OrchestraMessage _orchestramessage;
-        
+
         private ArduinoBus _arduinoBus;
 
         private static ServiceFirmata _internalRef;
-        
+
         #endregion
 
         private ServiceFirmata(string portname)
         {
             this._orchestramessage = OrchestraMessage.GetInstance();
-            this._arduinoBus = new ArduinoBus(portname, 57600,false,8000,true);
+            this._arduinoBus = new ArduinoBus(portname, 57600, false, 8000, true);
             this._arduinoBus.SysexCallback = sysexTraitment;
             this._arduinoBus.Open(true);
             this.registersActuatorDynamixel = AXXRegisterInfo.GetInstance();
@@ -95,16 +95,22 @@ namespace Arduino.Framework.Communication
                         byte identifiant_message = data[0];
                         byte identifiant_dynamixel = data[1];
                         byte error = data[2];
-                        if (error == 0)
-                        {
-                            //> On recherche s'il y a une méthode pour ce traitement;
-                            _orchestramessage.ValidateResponseMessage(command
-                                , ((identifiant_dynamixel << 8) + identifiant_message), data);
-                        }
-                        else
-                        {
-                            //> Todo mettre en place la gestion d'erreur 
-                        }
+                        //> On recherche s'il y a une méthode pour ce traitement;
+                        _orchestramessage.ValidateSysexResponseMessage(command
+                            , ((identifiant_dynamixel << 8) + identifiant_message), data);
+                    }
+                    break;
+                case ArduinoBus.SYSEXCMD_ANALOG_READ:
+                    if ((data != null) && (data.Length > 1))
+                    {
+                        byte ident_message = data[0]; // identifiant message (pin << 8) | iden_message
+                        byte num_pin = data[1];       // numéro de la broche analogique
+                        byte lsb_part = data[2];      // lsb part of value
+                        byte msb_part = data[3];      // msb part of value
+
+                        _orchestramessage.ValidateAnalogResponseMessage( ((num_pin << 8) |ident_message)
+                            , (UInt16)((msb_part << 8) + lsb_part));
+
                     }
                     break;
             }
@@ -117,7 +123,12 @@ namespace Arduino.Framework.Communication
             AX12Dynamixel result = new AX12Dynamixel(this, identifiant_dynamixel);
             return result;
         }
-        
+
+        public AnalogPin CreateAnalogPin(byte analogpin)
+        {
+            return new AnalogPin(this, analogpin);
+        }
+
         public BioloidRegister GetAX12Register(AX12RegisterAdd register) { return this.registersActuatorDynamixel.GetAX12Register(register); }
 
         public BioloidRegister GetAXS1Register(AXS1RegisterAdd register) { return this.registersActuatorDynamixel.GetAXS1Register(register); }
@@ -127,7 +138,7 @@ namespace Arduino.Framework.Communication
         public BioloidRegister[] GetAllAXS1Register() { return this.registersActuatorDynamixel.GetAXS1Registers(); }
 
         #region Methods SendXInstructionMessage
-    
+
         /// <summary>
         /// Permet de transmettre un message de type READ
         /// </summary>
@@ -135,13 +146,13 @@ namespace Arduino.Framework.Communication
         /// <param name="add">Adresse de début du registre à lire</param>
         /// <param name="length">Nombre de byte à lire</param>
         /// <param name="traitement">Méthode qui sera appelée lors du retour</param>
-        internal void SendReadInstructionMessage(byte identifiant_dynamixel,BioloidRegister add,byte length, ArduinoBus.currentSysexCallback traitement)
+        internal void SendReadInstructionMessage(byte identifiant_dynamixel, BioloidRegister add, byte length, ArduinoBus.currentSysexCallback traitement)
         {
             //> Création d'un paquet ReadInstructionMessage
             byte[] datas = BioloidCommunicationHelper.CreateReadDataInstruction(identifiant_dynamixel, add.StartAdressRegister
                                                                        , (byte)(add.Length + length));
             //> Recuperation d'un nouvel index de message
-            byte? identifiant_message = _orchestramessage.GetReferenceMessage(identifiant_dynamixel,traitement);
+            byte? identifiant_message = _orchestramessage.GetSysexReferenceMessage(identifiant_dynamixel, traitement);
             if (identifiant_message.HasValue)
             {
                 try
@@ -151,7 +162,7 @@ namespace Arduino.Framework.Communication
                 }
                 catch (Exception ex)
                 {
-                    _orchestramessage.DeleteReferenceMessage(identifiant_message.Value);
+                    _orchestramessage.DeleteSysexReferenceMessage(identifiant_message.Value);
                 }
             }
             else
@@ -169,7 +180,7 @@ namespace Arduino.Framework.Communication
         {
             byte[] datas = BioloidCommunicationHelper.CreatePingInstruction(identifiant_dynamixel);
             //> Récupération d'un nouvel index de message
-            byte? identifiant_message = _orchestramessage.GetReferenceMessage(identifiant_dynamixel, traitement_result);
+            byte? identifiant_message = _orchestramessage.GetSysexReferenceMessage(identifiant_dynamixel, traitement_result);
             if (identifiant_message.HasValue)
             {
                 try
@@ -179,7 +190,7 @@ namespace Arduino.Framework.Communication
                 }
                 catch (Exception ex)
                 {
-                    _orchestramessage.DeleteReferenceMessage(identifiant_message.Value);
+                    _orchestramessage.DeleteSysexReferenceMessage(identifiant_message.Value);
                 }
             }
             else
@@ -187,7 +198,7 @@ namespace Arduino.Framework.Communication
                 //> TODO prévoir ce que l'on fait dans ce cas
             }
         }
-        
+
         /// <summary>
         /// Permet de transmettre un mesage de type Write
         /// </summary>
@@ -200,7 +211,7 @@ namespace Arduino.Framework.Communication
             //> Création du message dynamixel
             byte[] dyna_paquet = BioloidCommunicationHelper.WriteInstruction(identifiant_dynamixel, add.StartAdressRegister, datas);
             //> Récupération d'un nouvel index de message
-            byte? identifiant_message = _orchestramessage.GetReferenceMessage(identifiant_dynamixel, traitement_result);
+            byte? identifiant_message = _orchestramessage.GetSysexReferenceMessage(identifiant_dynamixel, traitement_result);
             if (identifiant_message.HasValue)
             {
                 try
@@ -210,7 +221,7 @@ namespace Arduino.Framework.Communication
                 }
                 catch (Exception ex)
                 {
-                    _orchestramessage.DeleteReferenceMessage(identifiant_message.Value);
+                    _orchestramessage.DeleteSysexReferenceMessage(identifiant_message.Value);
                 }
             }
             else
@@ -242,7 +253,7 @@ namespace Arduino.Framework.Communication
         internal void SendRegWriteInstructionMessage(byte identifiant_dynamixel, BioloidRegister add, byte[] datas, ArduinoBus.currentSysexCallback traitement_result)
         {
             byte[] dyna_paquet = BioloidCommunicationHelper.RegWriteInstruction(identifiant_dynamixel, add.StartAdressRegister, datas);
-            byte? identifiant_message = _orchestramessage.GetReferenceMessage(identifiant_dynamixel, traitement_result);
+            byte? identifiant_message = _orchestramessage.GetSysexReferenceMessage(identifiant_dynamixel, traitement_result);
             if (identifiant_message.HasValue)
             {
                 try
@@ -252,7 +263,7 @@ namespace Arduino.Framework.Communication
                 }
                 catch (Exception ex)
                 {
-                    _orchestramessage.DeleteReferenceMessage(identifiant_message.Value);
+                    _orchestramessage.DeleteSysexReferenceMessage(identifiant_message.Value);
                 }
             }
             else
@@ -264,7 +275,7 @@ namespace Arduino.Framework.Communication
         internal void SendActionInstructionMessage(ArduinoBus.currentSysexCallback traitement_result)
         {
             byte[] dyna_paquet = BioloidCommunicationHelper.ActionInstruction();
-            byte? identifiant_message = _orchestramessage.GetReferenceMessage(BioloidCommunicationHelper.AX_BROADCAST_ID,traitement_result);
+            byte? identifiant_message = _orchestramessage.GetSysexReferenceMessage(BioloidCommunicationHelper.AX_BROADCAST_ID, traitement_result);
             if (identifiant_message.HasValue)
             {
                 try
@@ -274,7 +285,7 @@ namespace Arduino.Framework.Communication
                 }
                 catch (Exception ex)
                 {
-                    _orchestramessage.DeleteReferenceMessage(identifiant_message.Value);
+                    _orchestramessage.DeleteSysexReferenceMessage(identifiant_message.Value);
                 }
             }
             else
@@ -286,7 +297,7 @@ namespace Arduino.Framework.Communication
         internal void SendResetInstructionMessage(byte identifiant_dynamixel, ArduinoBus.currentSysexCallback traitement_result)
         {
             byte[] dyna_paquet = BioloidCommunicationHelper.ResetInstruction(identifiant_dynamixel);
-            byte? identifiant_message = _orchestramessage.GetReferenceMessage(identifiant_dynamixel, traitement_result);
+            byte? identifiant_message = _orchestramessage.GetSysexReferenceMessage(identifiant_dynamixel, traitement_result);
             if (identifiant_message.HasValue)
             {
                 try
@@ -296,7 +307,7 @@ namespace Arduino.Framework.Communication
                 }
                 catch (Exception ex)
                 {
-                    _orchestramessage.DeleteReferenceMessage(identifiant_message.Value);
+                    _orchestramessage.DeleteSysexReferenceMessage(identifiant_message.Value);
                 }
             }
             else
@@ -304,7 +315,23 @@ namespace Arduino.Framework.Communication
                 //> prévoir ce que l'on fait à ce niveau
             }
         }
-        
+
+        internal void SendAnalogReadMessage(byte pin, ArduinoBus.currentAnalogCallback traitement_result)
+        {
+            byte? identifiant_message = _orchestramessage.GetAnalogReferenceMessage(pin, traitement_result);
+            if (identifiant_message.HasValue)
+            {
+                try
+                {
+                    byte[] message = ServiceFirmata.EncapsulationMessage(new byte[] { pin }, ArduinoBus.SYSEXCMD_ANALOG_READ);
+                    this._arduinoBus.writeBytes(message);
+                }
+                catch (Exception ex)
+                {
+                    _orchestramessage.DeleteAnalogResponseMessage(identifiant_message.Value);
+                }
+            }
+        }
         #endregion
 
     }

@@ -45,7 +45,17 @@
   {
     switch(command)
     {
-      case SYSEXCMD_DYNAMIXEL_INSTRUCTION_PACKET :
+      case SYSEXCMD_ANALOG_READ:
+        byte analogpacket[4];
+        int analogresult;
+        analogresult = analogRead(argv[0]);                            // récupération de la valeur
+        analogpacket[0] = idmessage;				                   // identifiant message
+        analogpacket[1] = argv[0];                                     // numéro pin
+        analogpacket[2] = analogresult & 0xFF;                         // LSB value
+        analogpacket[3] = (analogresult >> 8) & 0xFF;                  // MSB value
+        Firmata.sendSysex(SYSEXCMD_ANALOG_READ,(byte)3,analogpacket);
+        break;
+     case SYSEXCMD_DYNAMIXEL_INSTRUCTION_PACKET:
         byte *status_packet;
         Dynamixel.sendInstructionPacket(argc,argv);
         byte length = Dynamixel.readStatusPacket(idmessage,&status_packet);
@@ -62,10 +72,7 @@
     switch(command)
    {
       case SYSEXCMD_DYNAMIXEL_VOID_GENERIC :
-	    Dynamixel.sendInstructionPacket(argc,argv);
-	    break;
-      case SYSEXCMD_ANALOG_READ :
-	   Firmata.sendAnalog(argv[0],analogRead(argv[0]));
-           break;
+        Dynamixel.sendInstructionPacket(argc,argv);
+        break;
    }
   }

@@ -30,6 +30,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -40,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AnalogPin.cs" />
     <Compile Include="ArduinoBus.cs" />
     <Compile Include="Bioloid.cs" />
     <Compile Include="Dynamixel.cs" />
@@ -48,6 +52,14 @@
     <Compile Include="ServiceFirmata.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>cp -f "D:\08-ELECTRONIQUE&amp;ROBOTIQUE\00-APPS\arduino-0022\libraries\Firmata\Firmata.h" "$(SolutionDir)ArduinoPart\Firmata\Firmata.h"
+cp -f "D:\08-ELECTRONIQUE&amp;ROBOTIQUE\00-APPS\arduino-0022\libraries\Firmata\Firmata.cpp"  "$(SolutionDir)ArduinoPart\Firmata\Firmata.cpp" 
+cp -f "D:\08-ELECTRONIQUE&amp;ROBOTIQUE\00-APPS\arduino-0022\libraries\Firmata\Boards.h" "$(SolutionDir)ArduinoPart\Firmata\Boards.h" 
+cp -f "D:\08-ELECTRONIQUE&amp;ROBOTIQUE\00-APPS\arduino-0022\libraries\DynamixelSerial3\DynamixelSerial3.cpp" "$(SolutionDir)ArduinoPart\DynamixelSerial3\DynamixelSerial3.cpp" 
+cp -f "D:\08-ELECTRONIQUE&amp;ROBOTIQUE\00-APPS\arduino-0022\libraries\DynamixelSerial3\DynamixelSerial3.h"  "$(SolutionDir)ArduinoPart\DynamixelSerial3\DynamixelSerial3.h" 
+cp -f "D:\08-ELECTRONIQUE&amp;ROBOTIQUE\02-DEV\sketch_feb23a\ArduinoCore\ArduinoCore.pde" "$(SolutionDir)ArduinoPart\ArduinoCore.pde"</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

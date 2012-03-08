@@ -17,6 +17,9 @@ namespace ConsoleArduinoDynamixel01
 
         private static Dictionary<int, AX12Dynamixel> poolAX12 = new Dictionary<int, AX12Dynamixel>();
         private static Dictionary<int, AX12Dynamixel> poolAXS1 = new Dictionary<int, AX12Dynamixel>();
+        private static BioloidRegister[] allregistersAX12 = null;
+
+        private static AnalogPin analogPin = 
 
         private static int maxmnenuitems;
 
@@ -33,7 +36,7 @@ namespace ConsoleArduinoDynamixel01
             initialisation_console();
             initialisation_bus();
 
-
+            allregistersAX12 = svcArduinoExchange.GetAllAX12Register();
 
             int selector = 0;
             bool good = false;
@@ -60,7 +63,11 @@ namespace ConsoleArduinoDynamixel01
                             break;
                         case 4:
                             console.Write("Lecture de paramètre pour un dynamixel AX12 donné", (int)(MyConsole.ColorText.Bleu), (int)(MyConsole.ColorBackground.Magenta));
+                            menuReadDynamixelAX12();
                             break;
+                        case 5:
+                            console.Write("Lecture de la tension sur une broche analogique", menuColortx, menuColorbg);
+                            menuReadAnalogiquePin();
                         default:
                             console.WriteError("Choix inconnu", true);
                             break;
@@ -83,6 +90,7 @@ namespace ConsoleArduinoDynamixel01
             //>MENU MODIFIER POSITION DYNAMIXEL 
             console.WriteNormal("3 => Modifier position dynamixel AX12");
             console.WriteNormal("4 => Lire Registre dynamixel AX12");
+            console.WriteNormal("5 => Lire Tension sur broche analogique");
             console.WriteNormal("=================================================================");
         }
 
@@ -156,25 +164,58 @@ namespace ConsoleArduinoDynamixel01
                 console.Write(">>> Veuillez saisir l'identifiant du dynamixel : ", (int)(MyConsole.ColorText.Jaune & MyConsole.ColorText.Brillant), (int)(MyConsole.ColorBackground.Rouge));
                 if (byte.TryParse(Console.ReadLine(), out id))
                 {
-
+                    write_ax12_register();
                     console.Write(">>> Veuillez choisir la propriété à lire :", menuColortx, menuColorbg);
                     if (byte.TryParse(Console.ReadLine(), out codeRegister))
                         good = true;
+                    else
+                        nbLoop++;
+                }
+                else
+                {
+                    nbLoop++;
                 }
             }
             if (good == true)
             {
                 if (poolAX12.ContainsKey(id))
                 {
-                    AX12Dynamixel dyna = poolAX12[id];
-                    BioloidRegister register = svcArduinoExchange.GetAX12Register((AX12RegisterAdd)codeRegister);
-                    dyna.ReadError += new RefreshValue(
-                        (addregister, value) =>
+                    RefreshValue method = null;
+                    method = new RefreshValue((addregister, value) =>
                         {
-                            console.Write("Résultat " + register.Libelle + ":" + value,sousMenuColortx ,sousMenuColorbg);
+                            console.Write("Résultat " + allregistersAX12[codeRegister - 1].Libelle + ":" + value, sousMenuColortx, sousMenuColorbg);
+                            poolAX12[id].ValueRefresh -= method;
                         });
-                    dyna.GetXVal(register);
+                    AX12Dynamixel dyna = poolAX12[id];
+                    dyna.ValueRefresh += method;
+                    dyna.GetXVal(allregistersAX12[codeRegister - 1]);
                 }
+            }
+        }
+
+        private static void menuReadAnalogiquePin()
+        {
+            byte idpin = 0;
+            byte nbloop = 0;
+            bool good = false;
+            while (nbloop < 4 && good == false)
+            {
+                console.Write(">>> Veuillez saisir le numéro de la broche [1-14] :", sousMenuColortx, sousMenuColorbg);
+                if (byte.TryParse(Console.ReadLine(), out idpin))
+                {
+                    if (idpin < 14 && idpin > 0)
+                    {
+                        good = true;
+                    }
+                    else
+                        nbloop++;
+                }
+                else
+                    nbloop++;
+            }
+            if (good == true)
+            {
+                
             }
         }
 
@@ -287,7 +328,16 @@ namespace ConsoleArduinoDynamixel01
 
         private static void write_ax12_register()
         {
-            Enum.
+            int nbloop = allregistersAX12.Length / 2;
+
+            for (int iloop = 0; iloop < nbloop; iloop++)
+            {
+                console.Write(string.Format(">{0,2} {1,-25} | {2,2} {3,25}", (2 * iloop + 1), allregistersAX12[2*iloop].Libelle, ((iloop+1) * 2), allregistersAX12[2*iloop + 1].Libelle), sousMenuColortx, sousMenuColorbg);
+            }
+            if ((allregistersAX12.Length % 2) != 1)
+            {
+                console.Write(string.Format(">{0,2} {1,-25}", nbloop, allregistersAX12[nbloop - 1].Libelle), sousMenuColortx, sousMenuColorbg);
+            }
         }
     }
 }

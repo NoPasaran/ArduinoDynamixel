@@ -9,6 +9,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arduino.Framework.Communs",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleArduinoDynamixel01", "ConsoleArduinoDynamixel01\ConsoleArduinoDynamixel01.csproj", "{A3EE1D1A-4F26-4CF9-8435-A1F6E94289AC}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ArduinoPart", "ArduinoPart", "{EBD2F466-A2AE-48C5-B400-15F6CB94A09B}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\..\08-ELECTRONIQUE&ROBOTIQUE\02-DEV\sketch_feb23a\ArduinoCore\ArduinoCore.pde = ..\..\..\..\08-ELECTRONIQUE&ROBOTIQUE\02-DEV\sketch_feb23a\ArduinoCore\ArduinoCore.pde
+		..\..\..\..\08-ELECTRONIQUE&ROBOTIQUE\00-APPS\arduino-0022\libraries\Firmata\Boards.h = ..\..\..\..\08-ELECTRONIQUE&ROBOTIQUE\00-APPS\arduino-0022\libraries\Firmata\Boards.h
+		..\..\..\..\08-ELECTRONIQUE&ROBOTIQUE\00-APPS\arduino-0022\libraries\DynamixelSerial3\DynamixelSerial3.cpp = ..\..\..\..\08-ELECTRONIQUE&ROBOTIQUE\00-APPS\arduino-0022\libraries\DynamixelSerial3\DynamixelSerial3.cpp
+		..\..\..\..\08-ELECTRONIQUE&ROBOTIQUE\00-APPS\arduino-0022\libraries\DynamixelSerial3\DynamixelSerial3.h = ..\..\..\..\08-ELECTRONIQUE&ROBOTIQUE\00-APPS\arduino-0022\libraries\DynamixelSerial3\DynamixelSerial3.h
+		..\..\..\..\08-ELECTRONIQUE&ROBOTIQUE\00-APPS\arduino-0022\libraries\Firmata\Firmata.cpp = ..\..\..\..\08-ELECTRONIQUE&ROBOTIQUE\00-APPS\arduino-0022\libraries\Firmata\Firmata.cpp
+		..\..\..\..\08-ELECTRONIQUE&ROBOTIQUE\00-APPS\arduino-0022\libraries\Firmata\Firmata.h = ..\..\..\..\08-ELECTRONIQUE&ROBOTIQUE\00-APPS\arduino-0022\libraries\Firmata\Firmata.h
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = WindowsFormsApplication1.vsmdi
